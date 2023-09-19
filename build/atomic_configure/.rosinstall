@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/r/catkin_wss/pfilter_ws/PFilter-noetic/build/devel/setup.sh
