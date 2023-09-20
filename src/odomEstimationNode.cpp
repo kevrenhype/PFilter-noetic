@@ -160,8 +160,8 @@ int main(int argc, char **argv)
     std::string theta_p_in;
     std::string theta_max_in;
     int k_new = 0;
-    float theta_p = 0.4;
-    int theta_max = 75;
+    float theta_p = 0.4; // 判定持久性阈值
+    int theta_max = 75; //局部特征点永久保留阈值
     nh.getParam("/scan_period", scan_period); 
     nh.getParam("/vertical_angle", vertical_angle); 
     nh.getParam("/max_dis", max_dis);

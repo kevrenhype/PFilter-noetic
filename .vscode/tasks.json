@@ -14,6 +14,20 @@
 			],
 			"group": "build",
 			"label": "catkin_make: build"
+		},
+		{
+			"type": "ros",
+			"command": "roslaunch",
+			"args": [
+				"pfilter",
+				"pfilter.launch",
+				"bag_filename:=/home/r/dataset/kitti_velod_bags/07.bag"
+
+			],
+			"problemMatcher": [
+				"$roslaunch"
+			],
+			"label": "roslaunch: roslaunch"
 		}
 	]
 }

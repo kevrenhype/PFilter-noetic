@@ -1,10 +1,13 @@
 
 #include "odomEstimationClass.h"
 
-struct cloud_point_index_idx 
+/**
+ * 点云-体素 序号对
+*/
+struct cloud_point_index_idx  
 {
-    unsigned int idx;
-    unsigned int cloud_point_index;
+    unsigned int idx; // 体素号
+    unsigned int cloud_point_index; //点云号
 
     cloud_point_index_idx (unsigned int idx_, unsigned int cloud_point_index_) : idx (idx_), cloud_point_index (cloud_point_index_) {}
     bool operator < (const cloud_point_index_idx &p) const { return (idx < p.idx); }
@@ -35,10 +38,12 @@ pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, fl
     output->height = 1;        
 	output->is_dense = true; 
 
-	Eigen::Vector4f min_p, max_p;
-    Eigen::Vector4i min_b_, max_b_, div_b_, divb_mul_;
+	Eigen::Vector4f min_p, max_p; // 点云中 最大最小的xyz值
+    Eigen::Vector4i min_b_, max_b_; // 边界体素序号值
+    Eigen::Vector4i div_b_, divb_mul_; // 三个方向上的体素数量；用于计算点云中的体素索引的动态系数
     pcl::getMinMax3D<PointType> (*input, min_p, max_p);
 
+    //存储六个方向上，边界体素的序号值
     min_b_[0] = static_cast<int> (floor (min_p[0] / dsleaf));
 	max_b_[0] = static_cast<int> (floor (max_p[0] / dsleaf));
 	min_b_[1] = static_cast<int> (floor (min_p[1] / dsleaf));
@@ -46,11 +51,12 @@ pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, fl
 	min_b_[2] = static_cast<int> (floor (min_p[2] / dsleaf));
 	max_b_[2] = static_cast<int> (floor (max_p[2] / dsleaf));
 
+    // 取得三个方向上的体素数量
     div_b_ = max_b_ - min_b_ + Eigen::Vector4i::Ones ();
 	div_b_[3] = 0;
 	divb_mul_ = Eigen::Vector4i (1, div_b_[0], div_b_[0] * div_b_[1], 0);
 
-    std::vector<cloud_point_index_idx> index_vector;
+    std::vector<cloud_point_index_idx> index_vector; //存 点云-体素 序号对的容器
 	index_vector.reserve (input->points.size ());
 
     for (int i = 0; i < input->points.size(); i++){
@@ -59,13 +65,13 @@ pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, fl
         int ijk2 = static_cast<int> (floor (input->points[i].z / dsleaf) - static_cast<float> (min_b_[2]));
 
         // Compute the centroid leaf index
-        int idx = ijk0 * divb_mul_[0] + ijk1 * divb_mul_[1] + ijk2 * divb_mul_[2];
-        index_vector.push_back (cloud_point_index_idx (static_cast<unsigned int> (idx), i));
+        int idx = ijk0 * divb_mul_[0] + ijk1 * divb_mul_[1] + ijk2 * divb_mul_[2]; // 体素号
+        index_vector.push_back (cloud_point_index_idx (static_cast<unsigned int> (idx), i)); // 体素号-点云号  键值对
     }
 
 	// Second pass: sort the index_vector vector using value representing target cell as index
 	// in effect all points belonging to the same output cell will be next to each other
-	std::sort (index_vector.begin (), index_vector.end (), std::less<cloud_point_index_idx> ());
+	std::sort (index_vector.begin (), index_vector.end (), std::less<cloud_point_index_idx> ()); //按照体素序号排序 <键值对>
 
 	// Third pass: count output cells
 	// we need to skip all the same, adjacenent idx values
@@ -160,7 +166,7 @@ void OdomEstimationClass::initMapWithPoints(const pcl::PointCloud<PointType>::Pt
 /**
  * 更新点到地图
  * 1、计算scan2scan的里程计
- * 2、
+ * 2、更新持久性点到地图，删除临时点
 */
 void OdomEstimationClass::updatePointsToMap(const pcl::PointCloud<PointType>::Ptr& edge_in, const pcl::PointCloud<PointType>::Ptr& surf_in){
 
