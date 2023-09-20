@@ -2,7 +2,7 @@
 <launch>
 
     
-    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(arg bag_filename) --topic /kitti/velo/pointcloud --wait-for-subscribers"/>
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(arg bag_filename) --topic /velodyne_points --wait-for-subscribers"/>
     <!-- For Velodyne VLP-16 
     <param name="scan_line" value="16" />
     -->
@@ -21,7 +21,7 @@
     <param name="vertical_angle" type="double" value="2.0" />
     <param name="max_dis" type="double" value="90.0" />
     <param name="min_dis" type="double" value="3.0" />
-    <param name="topic" type="string" value="/kitti/velo/pointcloud" />
+    <param name="topic" type="string" value="/velodyne_points" />
     <param name="k_new" type="string" value="0"/>
     <param name="theta_p" type="string" value="0.4"/>
     <param name="theta_max" type="string" value="75"/>

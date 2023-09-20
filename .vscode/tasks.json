@@ -5,7 +5,7 @@
 			"type": "catkin_make",
 			"args": [
 				"--directory",
-				"/home/r/pfilter_ws",
+				"/home/r/catkin_wss/pfilter_ws",
 				"-j16",
 				"-DCMAKE_BUILD_TYPE=Debug"
 			],
@@ -13,21 +13,21 @@
 				"$catkin-gcc"
 			],
 			"group": "build",
-			"label": "catkin_make: build"
+			"label": "catkin_make  DEBUG  -j16"
 		},
 		{
 			"type": "ros",
 			"command": "roslaunch",
 			"args": [
 				"pfilter",
-				"pfilter.launch",
+				"pfilter_kitti.launch",
 				"bag_filename:=/home/r/dataset/kitti_velod_bags/07.bag"
 
 			],
 			"problemMatcher": [
 				"$roslaunch"
 			],
-			"label": "roslaunch: roslaunch"
+			"label": "pfilter_kitti : play bag"
 		}
 	]
 }

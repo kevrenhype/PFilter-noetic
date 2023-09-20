@@ -128,14 +128,14 @@ void odom_estimation(){
             if(pubmapEdgePoints.getNumSubscribers() > 0){
                 pcl::toROSMsg(*odomEstimation.laserCloudCornerMap, cloudMsg);
                 cloudMsg.header.stamp = pointcloud_time;
-                cloudMsg.header.frame_id = "/map";
+                cloudMsg.header.frame_id = "map";
                 pubmapEdgePoints.publish(cloudMsg);
             }
             
             if(pubmapSurfPoints.getNumSubscribers() > 0){
                 pcl::toROSMsg(*odomEstimation.laserCloudSurfMap, cloudMsg);
                 cloudMsg.header.stamp = pointcloud_time;
-                cloudMsg.header.frame_id = "/map";
+                cloudMsg.header.frame_id = "map";
                 pubmapSurfPoints.publish(cloudMsg);
             }
         }
