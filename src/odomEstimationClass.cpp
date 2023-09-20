@@ -26,6 +26,10 @@ void extractstablepoint(pcl::PointCloud<PointType>::Ptr input, int k_new, float 
     extract.setNegative (false);//如果设为true,可以提取指定index之外的点云
     extract.filter (*input);
 }
+
+/**
+ * 
+*/
 pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, float dsleaf, int min_points_per_voxel_=0){
     pcl::PointCloud<PointType>::Ptr output(new pcl::PointCloud<PointType>);
     output->height = 1;        
@@ -118,6 +122,8 @@ pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, fl
 	output->width = static_cast<uint32_t> (output->points.size ());
 	return output;
 }
+
+
 void OdomEstimationClass::init(lidar::Lidar lidar_param, double map_resolution_in,  int k_new_para, float theta_p_para, int theta_max_para){
     //init local map
     laserCloudCornerMap = pcl::PointCloud<PointType>::Ptr(new pcl::PointCloud<PointType>());
@@ -151,6 +157,11 @@ void OdomEstimationClass::initMapWithPoints(const pcl::PointCloud<PointType>::Pt
 }
 
 
+/**
+ * 更新点到地图
+ * 1、计算scan2scan的里程计
+ * 2、
+*/
 void OdomEstimationClass::updatePointsToMap(const pcl::PointCloud<PointType>::Ptr& edge_in, const pcl::PointCloud<PointType>::Ptr& surf_in){
 
     if(optimization_count>2)
@@ -371,6 +382,14 @@ void OdomEstimationClass::addSurfCostFactor(const pcl::PointCloud<PointType>::Pt
 
 }
 
+/**
+ * 融合当前帧与地图
+ * 1、将点云按照位子变换加入地图
+ * 2、更新地图维护边界
+ * 3、裁剪点云，至地图边界内
+ * 4、提取稳定点
+ * 5、若点云足够多，变为红色？
+*/
 void OdomEstimationClass::addPointsToMap(const pcl::PointCloud<PointType>::Ptr& downsampledEdgeCloud, const pcl::PointCloud<PointType>::Ptr& downsampledSurfCloud){
 
     for (int i = 0; i < (int)downsampledEdgeCloud->points.size(); i++)

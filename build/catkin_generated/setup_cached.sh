@@ -9,5 +9,7 @@ export ROSLISP_PACKAGE_DIRECTORIES='/home/r/catkin_wss/pfilter_ws/PFilter-noetic
 
 # modified environment variables
 export CMAKE_PREFIX_PATH="/home/r/catkin_wss/pfilter_ws/PFilter-noetic/build/devel:$CMAKE_PREFIX_PATH"
+export LD_LIBRARY_PATH="/home/r/catkin_wss/pfilter_ws/PFilter-noetic/build/devel/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/home/r/catkin_wss/pfilter_ws/PFilter-noetic/build/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD='/home/r/catkin_wss/pfilter_ws/PFilter-noetic/build'
 export ROS_PACKAGE_PATH="/home/r/catkin_wss/pfilter_ws/PFilter-noetic:$ROS_PACKAGE_PATH"

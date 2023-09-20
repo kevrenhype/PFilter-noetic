@@ -15,11 +15,11 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
 
     int N_SCANS = lidar_param.num_lines;
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> laserCloudScans;
-    for(int i=0;i<N_SCANS;i++){
+    for(int i=0;i<N_SCANS;i++){ //初始化Laserscans
         laserCloudScans.push_back(pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>()));
     }
 
-    for (int i = 0; i < (int) pc_in->points.size(); i++)
+    for (int i = 0; i < (int) pc_in->points.size(); i++) // 按不同位置存入到lidar scans
     {
         int scanID=0;
         double distance = sqrt(pc_in->points[i].x * pc_in->points[i].x + pc_in->points[i].y * pc_in->points[i].y);
@@ -64,12 +64,12 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
     }
 
     for(int i = 0; i < N_SCANS; i++){
-        if(laserCloudScans[i]->points.size()<131){
+        if(laserCloudScans[i]->points.size()<131){ //激光点过少的激光线
             continue;
         }
         
         std::vector<Double2d> cloudCurvature; 
-        int total_points = laserCloudScans[i]->points.size()-10;
+        int total_points = laserCloudScans[i]->points.size()-10; //当前激光束减掉头尾后的数量
         for(int j = 5; j < (int)laserCloudScans[i]->points.size() - 5; j++){
             double diffX = laserCloudScans[i]->points[j - 5].x + laserCloudScans[i]->points[j - 4].x + laserCloudScans[i]->points[j - 3].x + laserCloudScans[i]->points[j - 2].x + laserCloudScans[i]->points[j - 1].x - 10 * laserCloudScans[i]->points[j].x + laserCloudScans[i]->points[j + 1].x + laserCloudScans[i]->points[j + 2].x + laserCloudScans[i]->points[j + 3].x + laserCloudScans[i]->points[j + 4].x + laserCloudScans[i]->points[j + 5].x;
             double diffY = laserCloudScans[i]->points[j - 5].y + laserCloudScans[i]->points[j - 4].y + laserCloudScans[i]->points[j - 3].y + laserCloudScans[i]->points[j - 2].y + laserCloudScans[i]->points[j - 1].y - 10 * laserCloudScans[i]->points[j].y + laserCloudScans[i]->points[j + 1].y + laserCloudScans[i]->points[j + 2].y + laserCloudScans[i]->points[j + 3].y + laserCloudScans[i]->points[j + 4].y + laserCloudScans[i]->points[j + 5].y;
@@ -79,15 +79,15 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
 
         }
         for(int j=0;j<6;j++){
-            int sector_length = (int)(total_points/6);
+            int sector_length = (int)(total_points/6); // 这样分最后一个sector将多几个点（不超过五个）
             int sector_start = sector_length *j;
             int sector_end = sector_length *(j+1)-1;
             if (j==5){
                 sector_end = total_points - 1; 
             }
-            std::vector<Double2d> subCloudCurvature(cloudCurvature.begin()+sector_start,cloudCurvature.begin()+sector_end); 
+            std::vector<Double2d> subCloudCurvature(cloudCurvature.begin()+sector_start,cloudCurvature.begin()+sector_end); //扇形区域的子曲率
             
-            featureExtractionFromSector(laserCloudScans[i],subCloudCurvature, pc_out_edge, pc_out_surf);
+            featureExtractionFromSector(laserCloudScans[i],subCloudCurvature, pc_out_edge, pc_out_surf); //扇内区域曲率分析
             
         }
 
@@ -211,6 +211,8 @@ LaserProcessingClass::LaserProcessingClass(){
     
 }
 
+
+// 两个构造函数，用于创建对象实例
 Double2d::Double2d(int id_in, double value_in){
     id = id_in;
     value =value_in;
