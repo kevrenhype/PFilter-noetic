@@ -56,7 +56,7 @@ pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, fl
 	div_b_[3] = 0;
 	divb_mul_ = Eigen::Vector4i (1, div_b_[0], div_b_[0] * div_b_[1], 0);
 
-    std::vector<cloud_point_index_idx> index_vector; //存 点云-体素 序号对的容器
+    std::vector<cloud_point_index_idx> index_vector; //存 点云-体素 序号对的容器  大小是输入点云的大小
 	index_vector.reserve (input->points.size ());
 
     for (int i = 0; i < input->points.size(); i++){
@@ -80,10 +80,10 @@ pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, fl
 	// first_and_last_indices_vector[i] represents the index in index_vector of the first point in
 	// index_vector belonging to the voxel which corresponds to the i-th output point,
 	// and of the first point not belonging to.
-	std::vector<std::pair<unsigned int, unsigned int> > first_and_last_indices_vector;
+	std::vector<std::pair<unsigned int, unsigned int> > first_and_last_indices_vector; // 存储每个体素中的开始和结束点的序号
 	// Worst case size
 	first_and_last_indices_vector.reserve (index_vector.size ());
-	while (index < index_vector.size ()) 
+	while (index < index_vector.size ())  //遍历整个点云，选择点云数足够多的Voxel，保存该体素的头尾点序号
 	{
 		unsigned int i = index + 1;
 		while (i < index_vector.size () && index_vector[i].idx == index_vector[index].idx) 
@@ -96,7 +96,7 @@ pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, fl
 	}
 
 	// Fourth pass: compute centroids, insert them into their final position
-	output->points.resize (total);
+	output->points.resize (total); // 将输入点云改为之前筛选出来的点对
 	index = 0;
 	for (unsigned int cp = 0; cp < first_and_last_indices_vector.size (); ++cp){
 		// calculate centroid - sum values from all input points, that have the same idx value in index_vector array
@@ -118,7 +118,7 @@ pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, fl
                 g_max = input->points[index_vector[li].cloud_point_index].g;
             }
         }
-        centroid /= static_cast<float> (last_index - first_index);
+        centroid /= static_cast<float> (last_index - first_index); //计算质心
         output->points[index].getVector4fMap () = centroid;
         output->points[index].r = r_max;
         output->points[index].g = g_max;
@@ -321,7 +321,7 @@ void OdomEstimationClass::addSurfCostFactor(const pcl::PointCloud<PointType>::Pt
         pointAssociateToMap(&(pc_in->points[i]), &point_temp);
         std::vector<int> pointSearchInd;
         std::vector<float> pointSearchSqDis;
-        kdtreeSurfMap->nearestKSearch(point_temp, 5, pointSearchInd, pointSearchSqDis);
+        kdtreeSurfMap->nearestKSearch(point_temp, 5, pointSearchInd, pointSearchSqDis); //scan-to-map 的特征匹配
 
         Eigen::Matrix<double, 5, 3> matA0;
         Eigen::Matrix<double, 5, 1> matB0 = -1 * Eigen::Matrix<double, 5, 1>::Ones();
@@ -336,7 +336,7 @@ void OdomEstimationClass::addSurfCostFactor(const pcl::PointCloud<PointType>::Pt
             }
             // find the norm of plane
             Eigen::Vector3d norm = matA0.colPivHouseholderQr().solve(matB0);
-            double negative_OA_dot_norm = 1 / norm.norm();
+            double negative_OA_dot_norm = 1 / norm.norm(); //法向量模长倒数？
             norm.normalize();
 
             bool planeValid = true;
@@ -358,7 +358,7 @@ void OdomEstimationClass::addSurfCostFactor(const pcl::PointCloud<PointType>::Pt
                                 map_in->points[pointSearchInd[1]].g +
                                 map_in->points[pointSearchInd[2]].g +
                                 map_in->points[pointSearchInd[3]].g +
-                                map_in->points[pointSearchInd[4]].g ) / 5.0 + 1;
+                                map_in->points[pointSearchInd[4]].g ) / 5.0 + 1; //observe 是  p-Index
                 float round = (map_in->points[pointSearchInd[0]].r + 
                                 map_in->points[pointSearchInd[1]].r +
                                 map_in->points[pointSearchInd[2]].r +

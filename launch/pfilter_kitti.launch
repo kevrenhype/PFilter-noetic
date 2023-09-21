@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
-    
-    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(arg bag_filename) --topic /velodyne_points --wait-for-subscribers"/>
+    <arg name="bag_filename" default="/home/r/dataset/kitti_velod_bags/07.bag" />
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(arg bag_filename)  "/>
     <!-- For Velodyne VLP-16 
     <param name="scan_line" value="16" />
     -->

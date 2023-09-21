@@ -28,12 +28,12 @@ accuracy by 9.4% than FLOAM.
 
 ## 3. Usage
 + To test on KITTI dataset and get the same ATEs as the shown in the Sec. 4:
-  + ```roslaunch pfilter pfilter_kitti.launch bag_filename:=/YOUR/BAG/PATH``` 
+  + ```roslaunch pfilter pfilter_kitti.launch ``` 
 + To test on other data:
   + ```roslaunch pfilter pfilter.launch bag_filename:=/YOUR/BAG/PATH k_new:=xx theta_p:=xx theta_max:=xx topic:=xx```
   + The xx should be replaced with suitable value. 
     + "*k_new* " is Int $\in [0,\infty)$, but [0,5] is recommanded. 
-    + "*theta_p* " is Float $\in [0,\infty)$, but [0,3] is recommanded.
+    + "*theta_p* "  is Float $\in [0,\infty)$, but [0,3] is recommanded.
     + "*theta_max* " is Int $\in [0,255]$.
     + "topic" is the ros topic of LIDAR points.
 

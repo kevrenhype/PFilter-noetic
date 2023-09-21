@@ -20,8 +20,7 @@
 			"command": "roslaunch",
 			"args": [
 				"pfilter",
-				"pfilter_kitti.launch",
-				"bag_filename:=/home/r/dataset/kitti_velod_bags/07.bag"
+				"pfilter_kitti.launch"
 
 			],
 			"problemMatcher": [
