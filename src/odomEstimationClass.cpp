@@ -13,28 +13,37 @@ struct cloud_point_index_idx
     bool operator < (const cloud_point_index_idx &p) const { return (idx < p.idx); }
 };
 
-void extractstablepoint(pcl::PointCloud<PointType>::Ptr input, int k_new, float theta_p, int theta_max){
-    std::vector<int> index;
-    for(int i = 0; i < input->points.size(); i++){
-        if(input->points[i].g < input->points[i].r * theta_p && input->points[i].r > k_new && input->points[i].g <theta_max + 1)
+/**
+ * 根据稀疏地图的g和r值，筛选满足持续性的点加入地图
+*/
+void extractstablepoint(pcl::PointCloud<PointType>::Ptr lasecloudMap_input, int k_new, float theta_p, int theta_max){
+    std::vector<int> value_index;
+    for(int i = 0; i < lasecloudMap_input->points.size(); i++){
+        if(lasecloudMap_input->points[i].g < lasecloudMap_input->points[i].r * theta_p //判定是否满足条件
+        && lasecloudMap_input->points[i].r > k_new 
+        && lasecloudMap_input->points[i].g <theta_max + 1)
             continue; 
-        index.push_back(i);
+        value_index.push_back(i);
     }
-    boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index);
+    boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(value_index);
     // Create the filtering object
     pcl::ExtractIndices<PointType> extract;
     // Extract the inliers
-    extract.setInputCloud (input);
+    extract.setInputCloud (lasecloudMap_input);
     extract.setIndices (index_ptr);
     extract.setNegative (false);//如果设为true,可以提取指定index之外的点云
-    extract.filter (*input);
+    extract.filter (*lasecloudMap_input);
 }
 
 /**
- * 
+ * 1、计算整个点云的边界  点的最大最小值
+ * 2、将所有点云按照体素号进行排序，用《点云序号-体素号》键值对存储每个点
+ * 3、选择点云数量足够的体素，记录每个体素的开始和结束点号
+ * 4、最后计算体素内的质心，并计算这里面最大的r和g值
+ * 5、最后output的存储是每个体素内的点云质心点
 */
 pcl::PointCloud<PointType>::Ptr rgbds (pcl::PointCloud<PointType>::Ptr input, float dsleaf, int min_points_per_voxel_=0){
-    pcl::PointCloud<PointType>::Ptr output(new pcl::PointCloud<PointType>);
+    pcl::PointCloud<PointType>::Ptr output(new pcl::PointCloud<PointType>); // 存储体素内的点云质心及最大的r和g值
     output->height = 1;        
 	output->is_dense = true; 
 
@@ -393,6 +402,7 @@ void OdomEstimationClass::addSurfCostFactor(const pcl::PointCloud<PointType>::Pt
  * 1、将点云按照位子变换加入地图
  * 2、更新地图维护边界
  * 3、裁剪点云，至地图边界内
+ * 4、根据体素筛选点云，计算每个体素的质心
  * 4、提取稳定点
  * 5、若点云足够多，变为红色？
 */
@@ -440,6 +450,7 @@ void OdomEstimationClass::addPointsToMap(const pcl::PointCloud<PointType>::Ptr& 
     // downSizeFilterEdge.filter(*laserCloudCornerMap);
     extractstablepoint(laserCloudSurfMap, k_new_surf, theta_p_surf, theta_max_surf);
     extractstablepoint(laserCloudCornerMap, k_new_edge, theta_p_edge, theta_max_edge);
+    // 更新点的持久帧次
     for(int i = 0;i < laserCloudSurfMap->points.size(); i++){
         if(laserCloudSurfMap->points[i].r > 250)
             laserCloudSurfMap->points[i].r = 255;

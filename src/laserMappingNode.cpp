@@ -45,7 +45,9 @@ void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
     mutex_lock.unlock();
 }
 
-
+/**
+ * 读取odom数据，将当前帧融合到地图中
+*/
 void laser_mapping(){
     while(1){
         if(!odometryBuf.empty() && !pointCloudBuf.empty()){
@@ -79,9 +81,9 @@ void laser_mapping(){
             mutex_lock.unlock();
             
 
-            laserMapping.updateCurrentPointsToMap(pointcloud_in,current_pose);
+            laserMapping.updateCurrentPointsToMap(pointcloud_in,current_pose); // 更新地图
 
-            pcl::PointCloud<pcl::PointXYZI>::Ptr pc_map = laserMapping.getMap();
+            pcl::PointCloud<pcl::PointXYZI>::Ptr pc_map = laserMapping.getMap(); //存入更新后地图
             sensor_msgs::PointCloud2 PointsMsg;
             pcl::toROSMsg(*pc_map, PointsMsg);
             PointsMsg.header.stamp = pointcloud_time;

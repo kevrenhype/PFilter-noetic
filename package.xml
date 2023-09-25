@@ -7,11 +7,10 @@
     This work is the official implementation of "PFilter: Building Persistent Maps through Feature Filtering for Fast and Accurate LiDAR-based SLAM".
   </description>
 
-  <maintainer email="dyf0202@mail.ustc.edu.cn">Yifan Duan</maintainer>
+  <maintainer email="kevrenhype@gmail.com">Yang Ren</maintainer>
 
   <license>BSD</license>
-  <url>https://yjsx.top</url>
-  <author email="dyf0202@mail.ustc.edu.cn">Yifan  Duan</author>
+  <author email="kevrenhype@gmail.com">Yang Ren</author>
   
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>geometry_msgs</build_depend>

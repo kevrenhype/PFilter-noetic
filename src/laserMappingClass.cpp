@@ -103,6 +103,10 @@ void LaserMappingClass::addDepthCellPositive(void){
 }
 
 //extend map is points exceed size
+/**
+ * 根据当前点，拓展维护的点云地图
+ * 若新加入的区域没有点云，则插入空点云
+*/
 void LaserMappingClass::checkPoints(int& x, int& y, int& z){
 
 	while(x + LASER_CELL_RANGE_HORIZONTAL> map_width-1){
@@ -146,16 +150,16 @@ void LaserMappingClass::checkPoints(int& x, int& y, int& z){
 
 //update points to map 
 void LaserMappingClass::updateCurrentPointsToMap(const pcl::PointCloud<pcl::PointXYZI>::Ptr& pc_in, const Eigen::Isometry3d& pose_current){
-	
-	int currentPosIdX = int(std::floor(pose_current.translation().x() / LASER_CELL_WIDTH + 0.5)) + origin_in_map_x;
-	int currentPosIdY = int(std::floor(pose_current.translation().y() / LASER_CELL_HEIGHT + 0.5)) + origin_in_map_y;
-	int currentPosIdZ = int(std::floor(pose_current.translation().z() / LASER_CELL_DEPTH + 0.5)) + origin_in_map_z;
+	int currentPosIdX,currentPosIdY,currentPosIdZ;//机器人当前位置 体素坐标序号
+	currentPosIdX = int(std::floor(pose_current.translation().x() / LASER_CELL_WIDTH + 0.5)) + origin_in_map_x; 
+	currentPosIdY = int(std::floor(pose_current.translation().y() / LASER_CELL_HEIGHT + 0.5)) + origin_in_map_y;
+	currentPosIdZ = int(std::floor(pose_current.translation().z() / LASER_CELL_DEPTH + 0.5)) + origin_in_map_z;
 
-	//check is submap is null
-	checkPoints(currentPosIdX,currentPosIdY,currentPosIdZ);
+	//check if submap is null
+	checkPoints(currentPosIdX,currentPosIdY,currentPosIdZ); // 检查当前位置需要维护的子地图是否为空，是则拓展
 
 	pcl::PointCloud<pcl::PointXYZI>::Ptr transformed_pc(new pcl::PointCloud<pcl::PointXYZI>());
-	pcl::transformPointCloud(*pc_in, *transformed_pc, pose_current.cast<float>());
+	pcl::transformPointCloud(*pc_in, *transformed_pc, pose_current.cast<float>()); //将局部坐标转换为全局坐标
 	
 	//save points
 	for (int i = 0; i < (int)transformed_pc->points.size(); i++)
@@ -172,6 +176,7 @@ void LaserMappingClass::updateCurrentPointsToMap(const pcl::PointCloud<pcl::Poin
 	}
 	
 	//filtering points 
+	// 按各个体素内进行降采样
 	for(int i=currentPosIdX-LASER_CELL_RANGE_HORIZONTAL;i<currentPosIdX+LASER_CELL_RANGE_HORIZONTAL+1;i++){
 		for(int j=currentPosIdY-LASER_CELL_RANGE_HORIZONTAL;j<currentPosIdY+LASER_CELL_RANGE_HORIZONTAL+1;j++){
 			for(int k=currentPosIdZ-LASER_CELL_RANGE_VERTICAL;k<currentPosIdZ+LASER_CELL_RANGE_VERTICAL+1;k++){
@@ -185,6 +190,9 @@ void LaserMappingClass::updateCurrentPointsToMap(const pcl::PointCloud<pcl::Poin
 
 }
 
+/**
+ * 此处从新读入地图，只维护附近的点，这里可以考虑修改
+*/
 pcl::PointCloud<pcl::PointXYZI>::Ptr LaserMappingClass::getMap(void){
 	pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudMap = pcl::PointCloud<pcl::PointXYZI>::Ptr(new  pcl::PointCloud<pcl::PointXYZI>());
 	for (int i = 0; i < map_width; i++){

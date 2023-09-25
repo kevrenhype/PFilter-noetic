@@ -44,8 +44,8 @@ class OdomEstimationClass
 		void getMap(pcl::PointCloud<PointType>::Ptr& laserCloudMap);
 
 		Eigen::Isometry3d odom;
-		pcl::PointCloud<PointType>::Ptr laserCloudCornerMap;
-		pcl::PointCloud<PointType>::Ptr laserCloudSurfMap;
+		pcl::PointCloud<PointType>::Ptr laserCloudCornerMap; //存储体素点云质心的系数点云地图
+		pcl::PointCloud<PointType>::Ptr laserCloudSurfMap;//存储体素点云质心的系数点云地图
 		float map_resolution;
 		int k_new_surf;
 		float theta_p_surf;
