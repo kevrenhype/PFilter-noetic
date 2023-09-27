@@ -29,6 +29,7 @@ std::mutex mutex_lock;
 std::queue<sensor_msgs::PointCloud2ConstPtr> pointCloudEdgeBuf;
 std::queue<sensor_msgs::PointCloud2ConstPtr> pointCloudSurfBuf;
 lidar::Lidar lidar_param;
+std::string sensorFrameId;
 
 ros::Publisher pubLaserOdometry;
 ros::Publisher pubmapSurfPoints;
@@ -109,12 +110,12 @@ void odom_estimation(){
             transform.setOrigin( tf::Vector3(t_current.x(), t_current.y(), t_current.z()) );
             tf::Quaternion q(q_current.x(),q_current.y(),q_current.z(),q_current.w());
             transform.setRotation(q);
-            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "base_link"));
+            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", sensorFrameId));
 
             // publish odometry
             nav_msgs::Odometry laserOdometry;
             laserOdometry.header.frame_id = "map";
-            laserOdometry.child_frame_id = "base_link";
+            laserOdometry.child_frame_id = sensorFrameId;
             laserOdometry.header.stamp = pointcloud_time;
             laserOdometry.pose.pose.orientation.x = q_current.x();
             laserOdometry.pose.pose.orientation.y = q_current.y();
@@ -162,15 +163,16 @@ int main(int argc, char **argv)
     int k_new = 0;
     float theta_p = 0.4; // 判定持久性阈值
     int theta_max = 75; //局部特征点永久保留阈值
-    nh.getParam("/scan_period", scan_period); 
-    nh.getParam("/vertical_angle", vertical_angle); 
-    nh.getParam("/max_dis", max_dis);
-    nh.getParam("/min_dis", min_dis);
-    nh.getParam("/scan_line", scan_line);
-    nh.getParam("/map_resolution", map_resolution);
-    nh.getParam("/k_new", k_new_in);
-    nh.getParam("/theta_p", theta_p_in);
-    nh.getParam("/theta_max", theta_max_in);
+    nh.getParam("scan_period", scan_period); 
+    nh.getParam("vertical_angle", vertical_angle); 
+    nh.getParam("max_dis", max_dis);
+    nh.getParam("min_dis", min_dis);
+    nh.getParam("scan_line", scan_line);
+    nh.getParam("map_resolution", map_resolution);
+    nh.getParam("k_new", k_new_in);
+    nh.getParam("theta_p", theta_p_in);
+    nh.getParam("theta_max", theta_max_in);
+    nh.getParam("sensorFrameId", sensorFrameId);
 
    
 
@@ -189,7 +191,7 @@ int main(int argc, char **argv)
     pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
     pubmapSurfPoints = nh.advertise<sensor_msgs::PointCloud2>("/surf_local_map", 1000); 
     pubmapEdgePoints = nh.advertise<sensor_msgs::PointCloud2>("/edge_local_map", 1000); 
-    
+    ROS_INFO("startODOM");
     std::thread odom_estimation_process{odom_estimation};
 
     ros::spin();

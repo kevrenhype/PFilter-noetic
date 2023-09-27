@@ -1,0 +1,71 @@
+velodyne:
+    sensorModel: 64     # 16, 32,
+    scanPeriod: 0.1     # 10HZ
+    sensorHeight: 1.73  # Lidar installation height value
+    verticalRes: 0.4    # Vertical resolution
+    initAngle: -24.9    # 64 -24.9 32/16 -15.0
+    sensorMinRange: 1.0   # Minimum detection range(m)
+    sensorMaxRange: 120.0 # Maximum detection range(m)
+    near_dis: 3.0
+
+# Regional ground segmentation parameter settings
+groundSeg: 
+    quadrant: 4    # How many quadrants are divided into
+    numSec: 3      # How many sub-areas are divided into each quadrant
+    dis: 0.3       # The distance threshold of the ground point segmentation
+    maxIter: 3
+    ground_seed_num: 20  # The number of initial seed points
+    ringMinNum: 131      # Beams smaller than this value will be filtered out
+ 
+#  DCVC segmentation param
+curvedVoxel: 
+    startR: 0.35    # Surface voxel initial polar diameter resolution
+    deltaR: 0.0004  # Pole diameter increment
+    deltaP: 1.2     # Pitch angle increment
+    deltaA: 1.2     # Azimuth increment
+    minSeg: 300      # After splitting, how many points are at least one category, and categories smaller than this number will be filtered out
+
+colorlist:
+  - 255,0,0      # 红色 (R: 255, G: 0, B: 0)
+  - 0,255,0      # 绿色 (R: 0, G: 255, B: 0)
+  - 0,0,255      # 蓝色 (R: 0, G: 0, B: 255)
+  - 255,255,0    # 黄色 (R: 255, G: 255, B: 0)
+  - 255,0,255    # 品红 (R: 255, G: 0, B: 255)
+  - 0,255,255    # 青色 (R: 0, G: 255, B: 255)
+  - 128,0,0      # 深红 (R: 128, G: 0, B: 0)
+  - 0,128,0      # 深绿 (R: 0, G: 128, B: 0)
+  - 0,0,128      # 深蓝 (R: 0, G: 0, B: 128)
+  - 128,128,0    # 橄榄 (R: 128, G: 128, B: 0)
+  - 128,0,128    # 紫色 (R: 128, G: 0, B: 128)
+  - 0,128,128    # 深青 (R: 0, G: 128, B: 128)
+  - 255,128,0    # 橙色 (R: 255, G: 128, B: 0)
+  - 255,0,128    # 粉红 (R: 255, G: 0, B: 128)
+  - 128,255,0    # 深黄 (R: 128, G: 255, B: 0)
+  - 128,0,255    # 紫红 (R: 128, G: 0, B: 255)
+  - 0,128,255    # 天蓝 (R: 0, G: 128, B: 255)
+  - 255,128,128  # 浅粉 (R: 255, G: 128, B: 128)
+  - 128,255,128  # 浅绿 (R: 128, G: 255, B: 128)
+  - 128,128,255  # 淡紫 (R: 128, G: 128, B: 255)
+  - 255,255,128  # 淡黄 (R: 255, G: 255, B: 128)
+  - 255,128,255  # 浅品 (R: 255, G: 128, B: 255)
+  - 128,255,255  # 浅青 (R: 128, G: 255, B: 255)
+  - 192,0,0      # 深红 (R: 192, G: 0, B: 0)
+  - 0,192,0      # 深绿 (R: 0, G: 192, B: 0)
+  - 0,0,192      # 深蓝 (R: 0, G: 0, B: 192)
+  - 192,192,0    # 阳光 (R: 192, G: 192, B: 0)
+  - 192,0,192    # 浅紫 (R: 192, G: 0, B: 192)
+  - 0,192,192    # 深青 (R: 0, G: 192, B: 192)
+  - 192,192,0    # 橙黄 (R: 192, G: 192, B: 0)
+  - 192,0,192    # 桃红 (R: 192, G: 0, B: 192)
+  - 0,192,192    # 珊瑚 (R: 0, G: 192, B: 192)
+  - 255,192,0    # 青橙 (R: 255, G: 192, B: 0)
+  - 255,0,192    # 玫瑰 (R: 255, G: 0, B: 192)
+  - 192,255,0    # 阳光绿 (R: 192, G: 255, B: 0)
+  - 192,0,255    # 薰衣草 (R: 192, G: 0, B: 255)
+  - 0,192,255    # 天空蓝 (R: 0, G: 192, B: 255)
+  - 255,192,192  # 桃红 (R: 255, G: 192, B: 192)
+  - 192,255,192  # 浅绿 (R: 192, G: 255, B: 192)
+  - 192,192,255  # 淡紫 (R: 192, G: 192, B: 255)
+  - 255,255,192  # 淡黄 (R: 255, G: 255, B: 192)
+  - 255,192,255  # 浅品 (R: 255, G: 192, B: 255)
+  - 192,255,255  # 浅青 (R: 192, G: 255, B: 255)

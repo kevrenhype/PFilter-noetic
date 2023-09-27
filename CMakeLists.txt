@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pfilter)
 
-#set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_FLAGS "-std=c++17")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g")
 
@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   eigen_conversions
 )
-
+find_package(yaml-cpp REQUIRED QUIET)
 find_package(Eigen3)
 if(NOT EIGEN3_FOUND)
   # Fallback to cmake_modules
@@ -37,6 +37,7 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
   ${CERES_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
+  yaml-cpp
 )
 
 link_directories(
@@ -52,14 +53,16 @@ catkin_package(
   INCLUDE_DIRS include
 )
 
-
+set (DEFAULT_LINK_LIBRARY ${EIGEN3_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${CERES_LIBRARIES} yaml-cpp)
 
 add_executable(PFilter_laser_processing_node src/laserProcessingNode.cpp src/laserProcessingClass.cpp src/lidar.cpp)
-target_link_libraries(PFilter_laser_processing_node ${EIGEN3_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(PFilter_laser_processing_node ${DEFAULT_LINK_LIBRARY})
 
 add_executable(PFilter_odom_estimation_node src/odomEstimationNode.cpp src/lidarOptimization.cpp src/lidar.cpp src/odomEstimationClass.cpp)
-target_link_libraries(PFilter_odom_estimation_node ${EIGEN3_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(PFilter_odom_estimation_node ${DEFAULT_LINK_LIBRARY})
 
 add_executable(PFilter_laser_mapping_node src/laserMappingNode.cpp src/laserMappingClass.cpp src/lidar.cpp)
-target_link_libraries(PFilter_laser_mapping_node ${EIGEN3_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(PFilter_laser_mapping_node ${DEFAULT_LINK_LIBRARY})
 
+add_executable(curvedVoxel_node src/additionNode.cpp src/additionClass.cpp )
+target_link_libraries(curvedVoxel_node ${DEFAULT_LINK_LIBRARY})

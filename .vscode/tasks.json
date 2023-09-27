@@ -26,7 +26,7 @@
 			"problemMatcher": [
 				"$roslaunch"
 			],
-			"label": "pfilter_kitti : play bag"
+			"label": "pfilter_kitti Odometry"
 		}
 	]
 }

@@ -110,12 +110,12 @@ int main(int argc, char **argv)
     double max_dis = 60.0;
     double min_dis = 2.0;
     double map_resolution = 0.4;
-    nh.getParam("/scan_period", scan_period); 
-    nh.getParam("/vertical_angle", vertical_angle); 
-    nh.getParam("/max_dis", max_dis);
-    nh.getParam("/min_dis", min_dis);
-    nh.getParam("/scan_line", scan_line);
-    nh.getParam("/map_resolution", map_resolution);
+    nh.getParam("scan_period", scan_period); 
+    nh.getParam("vertical_angle", vertical_angle); 
+    nh.getParam("max_dis", max_dis);
+    nh.getParam("min_dis", min_dis);
+    nh.getParam("scan_line", scan_line);
+    nh.getParam("map_resolution", map_resolution);
 
     lidar_param.setScanPeriod(scan_period);
     lidar_param.setVerticalAngle(vertical_angle);

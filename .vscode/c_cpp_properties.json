@@ -8,7 +8,8 @@
             "includePath": [
                 "/opt/ros/noetic/include/**",
                 "/home/r/catkin_wss/pfilter_ws/src/PFilter-noetic/include/**",
-                "/usr/include/**"
+                "/usr/include/**",
+                "/usr/include/pcl-1.10"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",
