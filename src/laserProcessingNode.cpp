@@ -54,6 +54,7 @@ void laser_processing()
 {
     while (1)
     {
+        ROS_INFO("laser_processing");
         if (!pointCloudBuf.empty())
         {
             // read data
@@ -114,14 +115,14 @@ int main(int argc, char **argv)
     double scan_period = 0.1;
     double max_dis = 60.0;
     double min_dis = 2.0;
-    std::string velodyne_points_2;
+    std::string pfilter_input_cloud;
 
     nh.getParam("scan_period", scan_period);
     nh.getParam("vertical_angle", vertical_angle);
     nh.getParam("max_dis", max_dis);
     nh.getParam("min_dis", min_dis);
     nh.getParam("scan_line", scan_line);
-    nh.getParam("velodyne_points_2", velodyne_points_2);
+    nh.getParam("pfilter_input_cloud", pfilter_input_cloud);
     nh.getParam("sensorFrameId", sensorFrameId);
 
     lidar_param.setScanPeriod(scan_period);
@@ -132,7 +133,7 @@ int main(int argc, char **argv)
 
     laserProcessing.init(lidar_param);
 
-    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>(velodyne_points_2, 100, velodyneHandler);
+    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>(pfilter_input_cloud, 100, velodyneHandler);
 
     pubLaserCloudFiltered = nh.advertise<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100);
 

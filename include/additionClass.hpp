@@ -1,41 +1,11 @@
-#include <yaml-cpp/yaml.h>
-
-// c++ lib
-#include <cmath>
-#include <vector>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <chrono>
-#include <map>
-#include <unordered_map>
-// ros lib
-#include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <nav_msgs/Odometry.h>
-#include <tf/transform_datatypes.h>
-#include <tf/transform_broadcaster.h>
-#include "std_msgs/Header.h"
-#include "std_msgs/Float64.h"
-// pcl lib
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
-#include <jsk_recognition_msgs/BoundingBox.h>
-#include <jsk_recognition_msgs/BoundingBoxArray.h>
-
-typedef pcl::PointXYZI pointType;
-typedef pcl::PointXYZRGBL pointTypeRGBL;
-typedef pcl::PointCloud<pcl::PointXYZI> pointTypeCloud;
-typedef pcl::PointCloud<pcl::PointXYZRGBL> pointTypeRGBLCloud;
+#include "common.hpp"
 
 class curvedVoxel
 {
 public:
-    curvedVoxel(ros::NodeHandle nh):nh_(nh){};
+    curvedVoxel(ros::NodeHandle nh) : nh_(nh){};
     ~curvedVoxel();
-    void init(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsgPtr);
+    void init(pointTypeCloud::Ptr &inputCloud, std_msgs::Header header);
     bool voxelFilter(std::vector<int> &label_info);
     /**
      * @brief get the index value in the polar radial direction
@@ -76,21 +46,22 @@ public:
 
     bool colorSegmentation();
 
-    void run(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsgPtr);
+    void run(pointTypeCloud::Ptr &inputCloud, std_msgs::Header header);
 
     void resetParams();
 
     void publishData();
 
-
-    template<typename T1,typename T2>
-    void copyPointXYZ(T1 src, T2 &tgt){
+    template <typename T1, typename T2>
+    void copyPointXYZ(T1 src, T2 &tgt)
+    {
         tgt.x = src.x;
         tgt.y = src.y;
         tgt.z = src.z;
     }
-    template<typename T>
-    void setPointRGB(T &tgt,std::vector<int> colorRGB){
+    template <typename T>
+    void setPointRGB(T &tgt, std::vector<int> colorRGB)
+    {
         tgt.r = colorRGB[0];
         tgt.g = colorRGB[1];
         tgt.b = colorRGB[2];
@@ -104,17 +75,17 @@ public:
     pointTypeCloud::Ptr pointCloudSegPtr;
     pointTypeRGBLCloud::Ptr pointCloudSegRGBLPtr;
 
-
     std_msgs::Header cloudHeader;
 
     std::vector<jsk_recognition_msgs::BoundingBox> boxInfo{};
 
-    
     std::string yamlConfigFile;
     std::string velodyne_points;
-    std::string velodyne_points_2;
+    std::string pfilter_input_cloud;
     std::string sensorFrameId;
-    
+    ros::Publisher pubCurvedPointCloud;
+    ros::Publisher pubCurvedPointCloudRGBA;
+    ros::Publisher pubBoundingBox;
 
 private:
     // >>>>>>>>>> LiDAR params
@@ -141,6 +112,8 @@ private:
     int height{0};
     int minSeg{0};
     int polarNum{0};
+    int groundFilter{1};
+    
     std::vector<double> polarBounds{};
     std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> polarCor;
     // std::unordered_map<int, Voxel> voxelMap{};
@@ -150,11 +123,21 @@ private:
 
     // Publisher && Subscriber
     ros::NodeHandle nh_;
-    ros::Publisher pubCurvedPointCloud;
-    ros::Publisher pubCurvedPointCloudRGBA;
-    ros::Publisher pubBoundingBox;
 
     // <<<<<<<<<<< Voxels params
+};
+
+class distanceWeight
+{
+public:
+    double disThreshold;
+
+    void init();
+
+    /**
+     * seg point dis to different area
+     */
+    void pointDisSeg();
 };
 
 class segmentation

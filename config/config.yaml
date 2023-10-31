@@ -17,13 +17,85 @@ groundSeg:
     ground_seed_num: 20  # The number of initial seed points
     ringMinNum: 131      # Beams smaller than this value will be filtered out
  
-#  DCVC segmentation param
+
+# >>>>>>>>>>>>>>>>>>>>>>
+# PFilter 原版
+# Average sequence translational RMSE (%):   0.6183
+# Average sequence rotational error (deg/m): 0.0027
+# 04
+# Average sequence translational RMSE (%):   0.6792
+# Average sequence rotational error (deg/m): 0.0036
+# 07
+# Average sequence translational RMSE (%):   0.4162
+# Average sequence rotational error (deg/m): 0.0024
+
+# <<<<<<<<<<<<<<<<<<<<<<
+# DCVC segmentation param
+# 00
+# Average sequence translational RMSE (%):   0.5920
+# Average sequence rotational error (deg/m): 0.0027
+# 04
+# Average sequence translational RMSE (%):   0.5892
+# Average sequence rotational error (deg/m): 0.0024
+# 07
+# Average sequence translational RMSE (%):   0.5170
+# Average sequence rotational error (deg/m): 0.0035
+
+# 04 Average sequence translational RMSE (%):   0.5894
+# Average sequence rotational error (deg/m): 0.0025
+
+# 07 Average sequence translational RMSE (%):   0.5354
+# Average sequence rotational error (deg/m): 0.0031
 curvedVoxel: 
-    startR: 0.35    # Surface voxel initial polar diameter resolution
-    deltaR: 0.0004  # Pole diameter increment
+    startR: 1    # Surface voxel initial polar diameter resolution
+    deltaR: 0.003  # Pole diameter increment
     deltaP: 1.2     # Pitch angle increment
     deltaA: 1.2     # Azimuth increment
-    minSeg: 300      # After splitting, how many points are at least one category, and categories smaller than this number will be filtered out
+    minSeg: 80      # After splitting, how many points are at least one category, and categories smaller than this number will be filtered out
+
+# 00
+# Average sequence translational RMSE (%):   0.5893
+# Average sequence rotational error (deg/m): 0.0027
+# 04 
+# Average sequence translational RMSE (%):   0.6106
+# Average sequence rotational error (deg/m): 0.0028
+# 07
+# Average sequence translational RMSE (%):   0.5118
+# Average sequence rotational error (deg/m): 0.0028
+# curvedVoxel: 
+#     startR: 2    # Surface voxel initial polar diameter resolution
+#     deltaR: 0.01  # Pole diameter increment
+#     deltaP: 1.2     # Pitch angle increment
+#     deltaA: 1.2     # Azimuth increment
+#     minSeg: 80      # After splitting, how many points are at least one category, and categories smaller than this number will be filtered out
+
+
+# 00
+# Average sequence translational RMSE (%):   0.6090
+# Average sequence rotational error (deg/m): 0.0029
+# curvedVoxel: 
+#     startR: 1    # Surface voxel initial polar diameter resolution
+#     deltaR: 0.005  # Pole diameter increment
+#     deltaP: 1.2     # Pitch angle increment
+#     deltaA: 1.2     # Azimuth increment
+#     minSeg: 80      # After splitting, how many points are at least one category, and categories smaller than this number will be filtered out
+
+# 00
+# Average sequence translational RMSE (%):   0.6367
+# Average sequence rotational error (deg/m): 0.0029
+# 04
+# Average sequence translational RMSE (%):   0.6094
+# Average sequence rotational error (deg/m): 0.0027
+# 07
+# Average sequence translational RMSE (%):   0.4788
+# Average sequence rotational error (deg/m): 0.0030
+# curvedVoxel: 
+#     startR: 1.5    # Surface voxel initial polar diameter resolution
+#     deltaR: 0.008  # Pole diameter increment
+#     deltaP: 1.2     # Pitch angle increment
+#     deltaA: 1.2     # Azimuth increment
+#     minSeg: 80      # After splitting, how many points are at least one category, and categories smaller than this number will be filtered out
+
 
 colorlist:
   - 255,0,0      # 红色 (R: 255, G: 0, B: 0)

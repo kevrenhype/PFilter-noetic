@@ -1,30 +1,38 @@
 <?xml version="1.0"?>
 <launch>
-
+    <arg name="showrviz" default="true" />
     <!-- -->
     <arg name="usebag" default="false" />
+    <arg name="sequence_py" default="00" />
+    <arg name="weighttype" default="2" />
+    <arg name="curvedfilter" default="1" />
+    <arg name="groundfilter" default="1" />
+    <arg name="featurePreExtract" default="1" />
+
+
+    <param name="velodyne_points" type="string" value="/velodyne_points" />
+    <param name="pfilter_input_cloud" type="string" value="/pfilter_input_cloud" />
+
     <group if="$(arg usebag)">
         <arg name="bag_filename" default="/home/r/dataset/kitti_velod_bags/07.bag" />
         <node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(arg bag_filename)  " />
     </group>
     <group unless="$(arg usebag)">
-        <include file="$(find kitti_reader)/launch/kittireader.launch" />
+        <include file="$(find kitti_tool)/launch/kitti.launch">
+            <arg name="sequence_number" default="$(arg sequence_py)" />
+        </include>
     </group>
 
 
-    <arg name="usecurved" default="true" />
-    <group if="$(arg usecurved)">
-        <param name="velodyne_points" type="string" value="/velodyne_points" />
-        <node pkg="pfilter" type="curvedVoxel_node" name="curvedVoxel_node" output="screen" />
-        <param name="velodyne_points_2" type="string" value="velodyne_points_2" />
-    </group>
-    <group unless="$(arg usecurved)">
-        <param name="velodyne_points_2" type="string" value="velodyne_points" />
-    </group>
+    <node pkg="pfilter" type="curvedVoxel_node" name="curvedVoxel_node" output="screen" />
 
 
-    <node pkg="pfilter" type="PFilter_laser_processing_node" name="PFilter_laser_processing_node"
-        output="screen" />
+    <group unless="$(arg featurePreExtract)">
+        <node pkg="pfilter" type="PFilter_laser_processing_node"
+            name="PFilter_laser_processing_node"
+            output="screen" />
+    </group>
+
 
     <node pkg="pfilter" type="PFilter_odom_estimation_node" name="PFilter_odom_estimation_node"
         output="screen" />
@@ -58,12 +66,16 @@
         value="/home/r/catkin_wss/pfilter_ws/src/PFilter-noetic/config/config.yaml" />
     <param name="sensorFrameId" type="string" value="$(arg sensorFrameId)" />
 
+    <param name="weightType" type="int" value="$(arg weighttype)" />
+    <param name="curvedfilter" type="int" value="$(arg curvedfilter)" />
+    <param name="groundfilter" type="int" value="$(arg groundfilter)" />
+    <param name="featurePreExtract" type="int" value="$(arg featurePreExtract)" />
     <!---       
 -->
     <node pkg="tf" type="static_transform_publisher" name="word2map_tf"
         args="0 0 0 0 0 0 /world /map 10" />
-    <arg name="rviz" default="true" />
-    <group if="$(arg rviz)">
+
+    <group if="$(arg showrviz)">
         <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz"
             args="-d $(find pfilter)/rviz/pfilter.rviz" />
     </group>

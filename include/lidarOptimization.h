@@ -14,6 +14,7 @@ Eigen::Matrix3d skew(Eigen::Vector3d& mat_in);
 class EdgeAnalyticCostFunction : public ceres::SizedCostFunction<1, 7> {
 	public:
 
+		EdgeAnalyticCostFunction(Eigen::Vector3d curr_point_, Eigen::Vector3d last_point_a_, Eigen::Vector3d last_point_b_,double point_weight_);
 		EdgeAnalyticCostFunction(Eigen::Vector3d curr_point_, Eigen::Vector3d last_point_a_, Eigen::Vector3d last_point_b_);
 		virtual ~EdgeAnalyticCostFunction() {}
 		virtual bool Evaluate(double const *const *parameters, double *residuals, double **jacobians) const;
@@ -21,10 +22,13 @@ class EdgeAnalyticCostFunction : public ceres::SizedCostFunction<1, 7> {
 		Eigen::Vector3d curr_point;
 		Eigen::Vector3d last_point_a;
 		Eigen::Vector3d last_point_b;
+
+		double point_weight = 0;
 };
 
 class SurfNormAnalyticCostFunction : public ceres::SizedCostFunction<1, 7> {
 	public:
+		SurfNormAnalyticCostFunction(Eigen::Vector3d curr_point_, Eigen::Vector3d plane_unit_norm_, double negative_OA_dot_norm_,double point_weight_);
 		SurfNormAnalyticCostFunction(Eigen::Vector3d curr_point_, Eigen::Vector3d plane_unit_norm_, double negative_OA_dot_norm_);
 		virtual ~SurfNormAnalyticCostFunction() {}
 		virtual bool Evaluate(double const *const *parameters, double *residuals, double **jacobians) const;
@@ -32,6 +36,8 @@ class SurfNormAnalyticCostFunction : public ceres::SizedCostFunction<1, 7> {
 		Eigen::Vector3d curr_point;
 		Eigen::Vector3d plane_unit_norm;
 		double negative_OA_dot_norm;
+		
+		double point_weight = 0;
 };
 
 class PoseSE3Parameterization : public ceres::LocalParameterization {

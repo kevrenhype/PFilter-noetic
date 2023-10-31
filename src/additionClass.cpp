@@ -1,5 +1,6 @@
 #include "additionClass.hpp"
 
+#include <omp.h>
 // curvedVoxel::curvedVoxel()
 // {
 //     ROS_INFO("startCurve");
@@ -9,18 +10,8 @@ curvedVoxel::~curvedVoxel()
     ROS_INFO("destroy");
 };
 
-void curvedVoxel::init(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsgPtr)
+void curvedVoxel::init(pointTypeCloud::Ptr &inputCloud, std_msgs::Header header)
 {
-
-    nh_.getParam("velodyne_points", velodyne_points);
-    nh_.getParam("velodyne_points_2", velodyne_points_2);
-    nh_.getParam("yamlConfigFile", yamlConfigFile);
-    nh_.getParam("sensorFrameId", sensorFrameId);
-
-    // Publishers
-    pubBoundingBox = nh_.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxLabel", 100);
-    pubCurvedPointCloud = nh_.advertise<sensor_msgs::PointCloud2>(velodyne_points_2, 100);
-    pubCurvedPointCloudRGBA = nh_.advertise<sensor_msgs::PointCloud2>("/curvedPointCloudRGBA", 100);
 
     // 参数配置
     YAML::Node node = YAML::LoadFile(yamlConfigFile);
@@ -44,7 +35,7 @@ void curvedVoxel::init(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsgPtr)
     minSeg = voxel_config["minSeg"].as<int>();
 
     // 遍历 "colors" 节点并将颜色值添加到容器中
-    
+
     for (const auto &colorNode : color_config)
     {
         std::string colorStr = colorNode.as<std::string>();
@@ -53,7 +44,7 @@ void curvedVoxel::init(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsgPtr)
         char comma;
         colorStream >> r >> comma >> g >> comma >> b;
         // 将RGB值存储在内部向量中
-        std::vector<int> rgb ;
+        std::vector<int> rgb;
         rgb.emplace_back(r);
         rgb.emplace_back(g);
         rgb.emplace_back(b);
@@ -61,13 +52,9 @@ void curvedVoxel::init(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsgPtr)
     }
 
     // 读取heade
-    cloudHeader.stamp = laserCloudMsgPtr->header.stamp;
-    cloudHeader.frame_id = sensorFrameId;
-
-    // Msg 转为 点云
-    pointCloudPtr.reset(new pointTypeCloud);
-    pcl::fromROSMsg(*laserCloudMsgPtr, *pointCloudPtr);
-    printvalue("pointCloudPtr", pointCloudPtr->size());
+    cloudHeader = header;
+    pointCloudPtr = inputCloud;
+    // printvalue("pointCloudPtr", pointCloudPtr->size());
 }
 
 /**
@@ -109,6 +96,8 @@ void curvedVoxel::convertToPolar(const pointTypeCloud &cloud_in_)
     polarCor.resize(totalSize);
 
     Eigen::Vector3d cur = Eigen::Vector3d::Zero();
+    omp_set_num_threads(std::min(6, omp_get_max_threads()));
+    #pragma omp parallel for
     for (size_t i = 0; i < totalSize; i++)
     {
         Eigen::Vector3d rpa = Eigen::Vector3d::Zero();
@@ -128,8 +117,8 @@ void curvedVoxel::convertToPolar(const pointTypeCloud &cloud_in_)
         polarCor[i] = rpa;
     }
     polarCor.shrink_to_fit();
-    printout("polarCor");
-    printout(polarCor.size());
+    // printout("polarCor");
+    // printout(polarCor.size());
     polarNum = 0;
     polarBounds.clear();
     width = static_cast<int>(std::round(360.0 / deltaA) + 1);
@@ -160,7 +149,8 @@ bool curvedVoxel::createHashTable(void)
     Eigen::Vector3d cur = Eigen::Vector3d::Zero();
     int polarIndex, pitchIndex, azimuthIndex, voxelIndex;
     voxelMap.reserve(totalSize);
-
+    omp_set_num_threads(std::min(6, omp_get_max_threads()));
+#pragma omp parallel for
     for (size_t item = 0; item < totalSize; ++item)
     {
         cur = polarCor[item];
@@ -198,7 +188,8 @@ bool curvedVoxel::createHashTable(void)
 void curvedVoxel::searchKNN(int &polar_index, int &pitch_index, int &azimuth_index,
                             std::vector<int> &out_neighIndex) const
 {
-
+    omp_set_num_threads(std::min(6, omp_get_max_threads()));
+#pragma omp parallel for
     for (auto z = pitch_index - 1; z <= pitch_index + 1; ++z)
     {
         if (z < 0 || z > height)
@@ -240,7 +231,8 @@ bool curvedVoxel::voxelFilter(std::vector<int> &label_info)
     label_info.resize(totalSize, -1);
     Eigen::Vector3d cur = Eigen::Vector3d::Zero();
     int polar_index, pitch_index, azimuth_index, voxel_index, currInfo, neighInfo;
-
+    omp_set_num_threads(std::min(6, omp_get_max_threads()));
+#pragma omp parallel for
     for (size_t i = 0; i < totalSize; ++i)
     {
         if (label_info[i] != -1)
@@ -363,8 +355,8 @@ void curvedVoxel::labelAnalysis(std::vector<int> &label_info)
             labelpointcount += info.second.clusterNum;
         }
     }
-    printvalue("labelStatic", labelCount);
-    printvalue("labelpointcount", labelpointcount);
+    // printvalue("labelStatic", labelCount);
+    // printvalue("labelpointcount", labelpointcount);
 }
 
 /**
@@ -376,6 +368,8 @@ bool curvedVoxel::colorSegmentation()
 {
     pointCloudSegPtr.reset(new pointTypeCloud());
     pointCloudSegRGBLPtr.reset(new pointTypeRGBLCloud());
+    omp_set_num_threads(std::min(6, omp_get_max_threads()));
+#pragma omp parallel for
     for (auto &label : labelRecords)
     {
         // box
@@ -390,7 +384,7 @@ bool curvedVoxel::colorSegmentation()
         for (auto &id : label.second.index)
         {
             pointCloudSegPtr->push_back(pointCloudPtr->points[id]);
-            
+
             min_x = std::min(min_x, pointCloudPtr->points[id].x);
             max_x = std::max(max_x, pointCloudPtr->points[id].x);
             min_y = std::min(min_y, pointCloudPtr->points[id].y);
@@ -399,8 +393,8 @@ bool curvedVoxel::colorSegmentation()
             max_z = std::max(max_z, pointCloudPtr->points[id].z);
 
             pointTypeRGBL pp;
-            copyPointXYZ(pointCloudPtr->points[id],pp);
-            setPointRGB(pp,colorList[label.first % colorList.size()]);
+            copyPointXYZ(pointCloudPtr->points[id], pp);
+            setPointRGB(pp, colorList[label.first % colorList.size()]);
             pointCloudSegRGBLPtr->points.push_back(pp);
         }
 
@@ -420,7 +414,7 @@ bool curvedVoxel::colorSegmentation()
 
         boxInfo.emplace_back(box);
     }
-    printvalue("boxInfo", boxInfo.size());
+    // printvalue("boxInfo", boxInfo.size());
 
     return true;
 }
@@ -429,28 +423,20 @@ void curvedVoxel::publishData()
 {
 
     // 发布每个标签的包围盒
-    // jsk_recognition_msgs::BoundingBoxArray boxArray;
-    // for (auto &box : boxInfo)
-    // {
-    //     boxArray.boxes.emplace_back(box);
-    // }
-    // boxArray.header = cloudHeader;
+    jsk_recognition_msgs::BoundingBoxArray boxArray;
+    for (auto &box : boxInfo)
+    {
+        boxArray.boxes.emplace_back(box);
+    }
+    boxArray.header = cloudHeader;
     // printvalue("boxArray", boxArray.boxes.size());
-    // pubBoundingBox.publish(boxArray);
+    pubBoundingBox.publish(boxArray);
 
-    //     // 聚类后带颜色的点云
-    // sensor_msgs::PointCloud2 laserCloudMsgOut2;
-    // pcl::toROSMsg(*pointCloudSegRGBLPtr, laserCloudMsgOut2);
-    // laserCloudMsgOut2.header = cloudHeader;
-    // pubCurvedPointCloudRGBA.publish(laserCloudMsgOut2);
-
-    // 聚类后的点云
-    sensor_msgs::PointCloud2 laserCloudMsgOut;
-    pcl::toROSMsg(*pointCloudPtr, laserCloudMsgOut);
-    laserCloudMsgOut.header = cloudHeader;
-    pubCurvedPointCloud.publish(laserCloudMsgOut);
-
-
+    // 聚类后带颜色的点云
+    sensor_msgs::PointCloud2 laserCloudMsgOut2;
+    pcl::toROSMsg(*pointCloudSegRGBLPtr, laserCloudMsgOut2);
+    laserCloudMsgOut2.header = cloudHeader;
+    pubCurvedPointCloudRGBA.publish(laserCloudMsgOut2);
 }
 
 void curvedVoxel::resetParams()
@@ -466,15 +452,18 @@ void curvedVoxel::resetParams()
     labelRecords.clear();
     polarBounds.clear();
 
-    pointCloudPtr.reset(new pointTypeCloud());
-    pointCloudSegPtr.reset(new pointTypeCloud());
 }
 
-void curvedVoxel::run(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsgPtr)
+void curvedVoxel::run(pointTypeCloud::Ptr &inputCloud, std_msgs::Header header)
 {
-    init(laserCloudMsgPtr);
+    init(inputCloud, header);
     /// step 1.0 convert point cloud to polar coordinate system
-    
+    if ((*pointCloudPtr).empty())
+    {
+        ROS_ERROR("not enough point to convert");
+        return;
+    }
+
     if (!(*pointCloudPtr).empty())
     {
         convertToPolar((*pointCloudPtr));
@@ -485,21 +474,21 @@ void curvedVoxel::run(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsgPtr)
         return;
     }
 
-    /// step 2.0 Create a hash table
-    // createHashTable();
+    // step 2.0 Create a hash table
+    createHashTable();
 
-    // /// step 3.0 DCVC segmentation
-    // std::vector<int> labelInfo{}; //
-    // if (!voxelFilter(labelInfo))
-    // {
-    //     ROS_ERROR("DCVC algorithm segmentation failure");
-    //     return;
-    // }
+    /// step 3.0 DCVC segmentation
+    std::vector<int> labelInfo{}; //
+    if (!voxelFilter(labelInfo))
+    {
+        ROS_ERROR("DCVC algorithm segmentation failure");
+        return;
+    }
 
-    // /// step 4.0 statistics category record
-    // labelAnalysis(labelInfo); //
+    /// step 4.0 statistics category record
+    labelAnalysis(labelInfo); //
 
-    // colorSegmentation();
+    colorSegmentation();
 
     publishData();
 

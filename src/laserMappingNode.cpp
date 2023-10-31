@@ -51,11 +51,11 @@ void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
 void laser_mapping(){
     while(1){
         if(!odometryBuf.empty() && !pointCloudBuf.empty()){
-
+            ROS_INFO("!odometryBuf.empty() && !pointCloudBuf.empty()");
             //read data
             mutex_lock.lock();
             if(!pointCloudBuf.empty() && pointCloudBuf.front()->header.stamp.toSec()<odometryBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period){
-                ROS_WARN("time stamp unaligned error and pointcloud discarded, pls check your data --> laser mapping node"); 
+                ROS_WARN("pointCloudBuf too early !!time stamp unaligned error and pointcloud discarded, pls check your data --> laser mapping node"); 
                 pointCloudBuf.pop();
                 mutex_lock.unlock();
                 continue;              
@@ -63,7 +63,7 @@ void laser_mapping(){
 
             if(!odometryBuf.empty() && odometryBuf.front()->header.stamp.toSec() < pointCloudBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period){
                 odometryBuf.pop();
-                ROS_INFO("time stamp unaligned with path final, pls check your data --> laser mapping node");
+                ROS_INFO("Odom too early !! time stamp unaligned with path final, pls check your data --> laser mapping node");
                 mutex_lock.unlock();
                 continue;  
             }
